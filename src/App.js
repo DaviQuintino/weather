@@ -1,7 +1,7 @@
-import { HiMiniMagnifyingGlassCircle } from "react-icons/hi2";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { TiWeatherWindy } from "react-icons/ti";
 import { IoWater } from "react-icons/io5";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import './styles.css';
 import { useState } from "react";
 
@@ -11,16 +11,24 @@ const apiKey = process.env.REACT_APP_KEY
 function App() {
   const [cidade, setCidade] = useState("");
   const [weatherData, setWeatherData] = useState(null)
+  const [error, setError] = useState(null);
+
 
   const handleClick = () => {
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cidade}&units=metric&lang=pt_br&appid=${apiKey}`)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Cidade não encontrada');
+        }
+        return response.json();
+      })
       .then(data => {
         setWeatherData(data);
-        console.log(data)
+        setError(null);
       })
       .catch(error => {
-        console.error('Erro ao chamar a API:', error);
+        console.error('Erro ao chamar a API:', error.message);
+        setError(error.message);
       });
   };
   const handleKeyPress = (e) => {
@@ -42,9 +50,12 @@ function App() {
             onKeyPress={handleKeyPress}
           />
           <button onClick={handleClick}>
-            <HiMiniMagnifyingGlassCircle />
+            <FaMagnifyingGlass />
           </button>
         </div>
+      </div>
+      <div className="erroMensagem">
+        {error && <p>{error}</p>}
       </div>
       <div id="weather-data">
         {weatherData && (
